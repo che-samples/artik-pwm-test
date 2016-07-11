@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <artik_module.h>
 #include <artik_platform.h>
+#include <artik_pwm.h>
 static artik_pwm_config config = {
     ARTIK_A5_PWMIO_XPWMIO1,
     "pwm",
@@ -11,12 +12,12 @@ static artik_pwm_config config = {
     200000,
     ARTIK_PWM_POLR_NORMAL
 };
-artik_error pwm_test_frequency(int platid)
+static artik_error pwm_test_frequency(int platid)
 {
     artik_pwm_handle handle;
     artik_error ret = S_OK;
-    artik_pwm_module* pwm = (artik_pwm_module*)artik_get_api_module("pwm");
-    if(platid == ARTIK5)
+    artik_pwm_module *pwm = (artik_pwm_module *)artik_request_api_module("pwm");
+    if (platid == ARTIK5)
         config.pin_num = ARTIK_A5_PWMIO_XPWMIO1;
     else
         config.pin_num = ARTIK_A10_PWMIO_XPWMIO1;
@@ -30,14 +31,14 @@ artik_error pwm_test_frequency(int platid)
     usleep(3 * 1000 * 1000);
     pwm->release(handle);
     fprintf(stdout, "TEST: %s suceeded\n", __func__);
+    artik_release_api_module(pwm);
     return ret;
 }
-int main()
+int main(void)
 {
     artik_error ret = S_OK;
     int platid = artik_get_platform();
-    if((platid == ARTIK5) || (platid == ARTIK10)) {
+    if ((platid == ARTIK5) || (platid == ARTIK10))
         ret = pwm_test_frequency(platid);
-    }
     return (ret == S_OK) ? 0 : -1;
 }
